@@ -8,6 +8,11 @@ from .models import Post
 @login_required(login_url='/login')
 def home(request):
     posts = Post.objects.all()
+    if request.method == "POST":
+        post_id = request.POST.get("post-id")
+        post = Post.objects.filter(id=post_id).first()
+        if post and post.author == request.user:
+            post.delete()
     return render(request, "main/home.html", {'posts': posts})
 
 
@@ -16,7 +21,6 @@ def create_post(request):
     if request.method == "POST":
         form = PostForm(request.POST)
         if form.is_valid():
-            # commit=False para no salvar los datos
             post = form.save(commit=False)
             post.author = request.user
             post.save()
